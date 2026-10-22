@@ -1531,3 +1531,13 @@ html[lang="fa"] .kind { font-size: .74rem; letter-spacing: 0; }
 .np__list { list-style: none; margin: .8rem 0 1rem; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: .5rem 1.5rem; }
 .np__list li { padding-block: .5rem; border-block-end: 1px solid var(--line); display: flex; gap: .7rem; align-items: baseline; }
 .np__list li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; border: 1px solid var(--brass); flex: none; translate: 0 -1px; }
+
+/* pro-upgrade: tap targets, hero action hierarchy, focus */
+.link-arrow,.text-link{min-block-size:44px;display:inline-flex;align-items:center}
+footer a{display:inline-flex;align-items:center;min-block-size:44px}
+.hero__cta{align-items:center;column-gap:1.4rem}
+.hero__more{font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;font-weight:500;color:inherit;text-decoration:underline;text-underline-offset:6px;text-decoration-thickness:1px;display:inline-flex;align-items:center;min-block-size:44px}
+.hero__more:hover{text-decoration-thickness:2px}
+:where(a,button,summary,input,select,textarea):focus-visible{outline:2px solid var(--brass,#c9a96a);outline-offset:3px}
+
+.viewer__bar button,.viewer__bar a{min-block-size:44px}
