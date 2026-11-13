@@ -452,7 +452,7 @@
   // backdrop-filter, and only where it is cheap and welcome (not low-power, reduced transparency, higher contrast or forced colors).
   (function () {
     var fine = !!(window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches);
-    var GLASS = '.tools .tool, .totop, .launch__dot, .journey__skip';
+    var GLASS = '.tools .tool, .totop, .launch__dot, .journey__skip, .lb__btn, .nav a.cta, .btn, .filter, .aptbtn';
     if (fine) {
       var on = null, gx = 0, gy = 0, gr = 0;
       var paint = function () { gr = 0; if (on) { on.style.setProperty('--gx', gx + 'px'); on.style.setProperty('--gy', gy + 'px'); } };

@@ -45,9 +45,28 @@ One shared material instead of a different blur on every control. It is plain CS
 
 Rules kept: everything sits inside `@supports (backdrop-filter...)`. `prefers-reduced-transparency`, `prefers-contrast: more` and `forced-colors` restore opaque surfaces with no blur, no sheen and no lens. Reduced motion keeps the static glass but drops the lens filter and the pointer script (the back-to-top button is part of the motion layer, so it does not exist there). Lite devices (`data-lite`) are handled by the same early return.
 
+### Round two
+
+Same material on more surfaces. All of it lives in the second block at the end of `site.css` ("Liquid glass, round two").
+
+| Where | What changed |
+|---|---|
+| Buttons (`.btn`, header CTA) | Lit rim, pointer sheen and a softer 14 px corner on every variant. Outline variants (`--ghost`, `--lineLight`) and the header CTA are true glass; the primary and light buttons keep their solid fill (contrast) |
+| Filters, chips, apartment switcher | Glass at rest, solid fill when selected (`aria-pressed`) |
+| Journey | Caption becomes a glass card where the text sits on the photograph (wide layouts only; a portrait phone keeps its flat panel). Journey and day/dusk progress tracks sit in a glass capsule |
+| Phone menu | Page stays faintly visible behind it (88% night, 36 px blur) |
+| Toast | Dark glass pill |
+| Lightbox | Frosted backdrop (28 px), glass controls with a darker tint so they read on bright photos, lens refraction on Chromium, glass caption (hidden when empty) |
+
+Fallbacks follow the same rule as before: reduced transparency, higher contrast and forced colors give opaque surfaces (the journey card becomes a solid dark panel). Reduced motion keeps the static glass on buttons and pills; the plain journey list gets no card. Pointer sheen now also covers the buttons, filters, apartment switcher, header CTA and lightbox controls. Tests: `tests/glass2.spec.mjs` (10); they fail against the previous CSS. Full suite: 72 passing.
+
+Cost: the glass caption card is the one new surface with a measurable price. Scrolling the pinned journey in this workspace (software rendering, no GPU) takes about 10% longer per frame with the card than without; the progress capsules and everything else are in the noise. Real GPUs handle one blurred 560x300 region far more cheaply, but this was not measured on a phone, so check the journey on a mid-range Android before launch. Lite devices (`data-lite`) never get the card.
+
+Not glassed on purpose: form fields (legibility first), the side dots (hidden labels make their box wider than the dots), and the custom cursor ring (a moving backdrop filter every frame is not worth it).
+
 Known limits: the refraction needs Chromium, because `backdrop-filter: url()` is not implemented elsewhere; Safari and Firefox get the blur material without it, and those two were not tested here (no such browsers in this workspace). Nested backdrop filters inside the blurred header cannot sample page imagery, which is why the header buttons have no lens. On the mobile journey section the back-to-top disc can pass over the skip pill for a moment while scrolling; the glass makes that visible, it does not hide the pill.
 
-Tests: `tests/glass.spec.mjs` (10). Full suite: 62 passing. Lighthouse (mobile, local, two runs): accessibility 100, SEO 100, performance 74-83 against 75-82 before, CLS 0. Cost: about +1 KB gzip in `site.min.css` (25.1 KB) and +1 KB in `motion.min.js` (6.1 KB). Source for the CSS block is the "Liquid glass" section at the end of `site.css`; as before, the `.min` files were edited by hand.
+Tests: `tests/glass.spec.mjs` (10). Lighthouse (mobile, local, two runs): accessibility 100, SEO 100, performance 74-83 against 75-82 before, CLS 0. Cost: about +1 KB gzip in `site.min.css` (25.1 KB) and +1 KB in `motion.min.js` (6.1 KB). Source for the CSS block is the "Liquid glass" section at the end of `site.css`; as before, the `.min` files were edited by hand.
 
 ## Measured sizes (esbuild, minified, gzip)
 
