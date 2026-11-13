@@ -1,6 +1,6 @@
 # Ganjineh Ofogh (برج گنجینه افق) — working notes
 
-Static marketing site for a residential tower in Ozgol, Tehran. Persian is primary (RTL), English lives in `en/`. Hosted on GitHub Pages at `/ganjineh-ofogh/` (preview) and `ganjinehofogh.ir` (production). **All links and assets must stay relative** so both work.
+Static marketing site for a residential tower in Ozgol, Tehran. Persian is primary (RTL), English lives in `en/`. Hosted on GitHub Pages at `/ganjineh-ofogh/` (preview) and `ganjinehofogh.com` (production). **All links and assets must stay relative** so both work.
 
 ## Rules that matter here
 - **Accuracy over spectacle.** Never invent building geometry, areas, floor counts or specifications. The tower viewer tags every fact (plan / render / assumed); keep that system. The floor count is an open question for the owner.
@@ -10,7 +10,7 @@ Static marketing site for a residential tower in Ozgol, Tehran. Persian is prima
 - This repo is generated output (`sw.js` mentions `tools/build_site.py`, which is not here). Hand edits are lost if the site is regenerated from that source.
 - Persian typography: never split Persian words into characters; keep half-spaces; no Latin letter-spacing on Persian text.
 - Respect `prefers-reduced-motion`, `data-lite`, and `prefers-reduced-transparency`/`prefers-contrast`. Blur is decoration only.
-- Launch state: the owner asked for the site to go public on 2026-11-13, so `robots.txt` now allows crawling and lists the sitemap (do not restore `Disallow: /`). `data-mode="preview"` is only a label (no script reads it); the visible preview notices and the disabled enquiry form are what tell visitors the truth until an enquiry backend answers `/api/status`, so leave them. The `CNAME` file is added only after DNS for ganjinehofogh.ir points at GitHub Pages (adding it earlier redirects the github.io address to a domain that does not resolve).
+- Launch state: the owner asked for the site to go public on 2026-11-13, so `robots.txt` now allows crawling and lists the sitemap (do not restore `Disallow: /`). `data-mode="preview"` is only a label (no script reads it); the visible preview notices and the disabled enquiry form are what tell visitors the truth until an enquiry backend answers `/api/status`, so leave them. The `CNAME` file is added only after DNS for ganjinehofogh.com points at GitHub Pages (adding it earlier redirects the github.io address to a domain that does not resolve).
 
 ## Commands
 `npm install` · `node tools/serve.mjs` · `npm test` · `node tools/sync-assets.mjs [--check]` · `node tools/build-vendor.mjs` · `node tools/make-sitemap.mjs`

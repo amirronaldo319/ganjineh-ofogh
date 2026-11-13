@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://ganjinehofogh.ir/sitemap.xml
+Sitemap: https://ganjinehofogh.com/sitemap.xml
