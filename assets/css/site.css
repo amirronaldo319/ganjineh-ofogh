@@ -1608,3 +1608,46 @@ html[lang="fa"] .scene__text h3 { font-weight: 600; }
   html.js:not([data-lite]) .scene__text p { font-size: .85rem; line-height: 1.45; }
   html.js:not([data-lite]) .journey .kind { inset-block-end: 66px; }
 }
+/* ───────── glass fallbacks ─────────
+   Backdrop blur is decoration only. When the visitor asks for less transparency or more contrast, or the browser has no
+   backdrop-filter, every blurred surface becomes an opaque one with the same colours. Appended last so it wins the cascade. */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
+  .header.is-stuck, .totop, .launch__dot, .crown .frame .tag, .visit__card, .lb::backdrop { backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .header.is-stuck { background: var(--bg); }
+  .totop { background: var(--bg); box-shadow: 0 0 0 1px var(--line-strong); }
+  .launch__dot { background: var(--night); }
+  .crown .frame .tag { background: var(--night); }
+  .visit__card { background: var(--night-2); }
+  .lb::backdrop { background: #080c0a; }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .header.is-stuck { background: var(--bg); }
+  .totop { background: var(--bg); }
+  .launch__dot, .crown .frame .tag { background: var(--night); }
+  .visit__card { background: var(--night-2); }
+  .lb::backdrop { background: #080c0a; }
+}
+/* ───────── smooth wheel scrolling (assets/js/smooth.min.js, desktop pointers only) ───────── */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis:not(.lenis-autoToggle).lenis-stopped { overflow: clip; }
+.lenis [data-lenis-prevent], .lenis .rail { overscroll-behavior: contain; }
+
+/* ═════ statement reveal, live Tehran light, side-dots clearance ═════ */
+/* the statement's words light up in reading order as it crosses the screen (motion.js sets --qp and --qn; with no JS or reduced motion nothing is dimmed) */
+.quote.is-lit .sw > i { opacity: clamp(.3, calc(.3 + (var(--qp, 1) * (var(--qn, 1) + 5) - var(--wi, 0)) * .35), 1); }
+/* section dots: the active label rides beside its dot only where the page margin can hold it; narrower, it shows on hover or focus */
+@media (min-width: 1180px) and (max-width: 1719px) {
+  .dots a.is-on:not(:hover):not(:focus-visible) span { opacity: 0; }
+}
+/* live light: the sun over Tehran right now, under the day-to-dusk heading */
+.scrub__live { display: inline-flex; align-items: center; gap: .6rem; margin: .9rem 0 0; padding: .38rem .95rem; border-radius: 99px; font-size: .82rem; line-height: 1.5;
+  color: rgba(237, 232, 220, .88); background: rgba(237, 232, 220, .08); border: 1px solid rgba(237, 232, 220, .18);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2); backdrop-filter: blur(12px) saturate(1.2); }
+.scrub__live[hidden] { display: none; }
+.scrub__live i { flex: none; width: 7px; height: 7px; border-radius: 50%; background: #d6c18f; animation: livePulse 2.8s var(--ease) infinite; }
+.scrub__live .t { font-variant-numeric: tabular-nums; unicode-bidi: isolate; }
+@keyframes livePulse { 0% { box-shadow: 0 0 0 0 rgba(214, 193, 143, .5); } 70%, 100% { box-shadow: 0 0 0 9px rgba(214, 193, 143, 0); } }
+@media (prefers-reduced-motion: reduce) { .scrub__live i { animation: none; } }
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) { .scrub__live { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--night-2); } }
+@media print { .scrub__live { display: none; } }

@@ -268,6 +268,12 @@
   var wipeDirs = ['', 's', 'e'], wi = 0;
   $$('.rv-img').forEach(function (el) { var d = wipeDirs[wi++ % 3]; if (d) el.setAttribute('data-wipe', d); });
 
+  /* ───────── statements: the words light up one after another as the line crosses the screen ───────── */
+  // The quote is already split into words above (Persian by word only, so letters keep joining). CSS reads --qp (0…1) and --qn (word count)
+  // and sets each word's opacity from its --wi; with no JS, reduced motion or lite mode nothing is dimmed.
+  var lit = $$('.quote');
+  lit.forEach(function (q) { q.classList.add('is-lit'); });
+
   /* ───────── one rAF loop for scroll-driven values ───────── */
   var queued = false;
   function schedule() { if (!queued) { queued = true; requestAnimationFrame(frame); } }
@@ -280,6 +286,13 @@
       var r = p.host.getBoundingClientRect();
       var prog = clamp(((r.top + r.height / 2) - vh / 2) / (vh / 2 + r.height / 2), -1, 1);
       p.el.style.setProperty('--plx', (-prog * p.k * r.height).toFixed(1) + 'px');
+    });
+    lit.forEach(function (q) {
+      var r = q.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > vh) return;
+      q.style.setProperty('--qn', q.querySelectorAll('.sw').length);
+      // starts as the line enters the lower tenth of the screen, fully lit once it is above the middle
+      q.style.setProperty('--qp', clamp((vh * 0.9 - r.top) / (vh * 0.44), 0, 1).toFixed(3));
     });
   }
   window.addEventListener('scroll', schedule, { passive: true });
