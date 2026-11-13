@@ -78,6 +78,30 @@ Result (same rig, before -> after, idle CPU of one core): scrollY 3000: 13.0-13.
 
 What this does not fix: the first-load path was already light (about 790 KB, no third-party requests); what a visitor in Iran feels from GitHub Pages' US hosting, and how iPhone Safari handles the blur layers, cannot be measured from this workspace.
 
+## Liquid glass V20: shared tokens, a floating capsule header, three signature surfaces
+
+Branch `design/ganjineh-liquid-glass-v20`, local only: not committed, pushed or deployed. `robots.txt` and `data-mode="preview"` are untouched.
+
+**Token layer.** One block at the end of `site.css` / `site.min.css` defines `--glass-*` (blur 12/20/26 px, saturation 1.7, fills, rims, radii 14/28 px, shadows, timings) and a recipe that every new surface uses: `--g-fill / --g-blur / --g-bright / --g-radius` in, `background + backdrop-filter + inset rim + sheen` out. Five variants exist as classes: `.glass--clear`, `--pearl`, `--frost`, `--midnight`, `--champagne`. The round-one and round-two surfaces were not refactored onto the tokens.
+
+**Surfaces.**
+- Header: the full-width bar is only a footprint (`pointer-events: none`); `.header__in` is a floating pearl capsule. Scroll changes its density, never its geometry. The theme/language buttons and the champagne "private visit" capsule sit inside it and deliberately have no `backdrop-filter` of their own (one backdrop layer per surface; a nested blur would only sample the capsule). The reading-progress hairline moved inside the capsule's lower edge. The gliding `.nav__ind` is now a champagne pill.
+- Garden panel (`.bleed__in`): a frost panel on the photograph.
+- Closing invitation (`.visit`): a midnight glass panel over the existing dusk tower photograph. The photo is injected by `motion.js` only when the band has no picture, is `aria-hidden`, lazy, carries the same "Concept render" label as other renders, is not injected at all in reduced-motion or lite mode (the panel then sits on the plain dark band), and is hidden by CSS under reduced transparency / higher contrast / forced colours.
+- Phone menu: the scrim is the overlay; the glass is the `nav` panel (a `clip-path` on `.menu` would have made the glass sample only itself, so it was removed). A tap on the scrim closes it (`site.js`, one line).
+
+**Fallbacks.** `prefers-reduced-transparency`, `prefers-contrast: more` and `forced-colors` make every V20 surface an opaque panel; `html[data-lite]` makes the garden panel a solid dark panel with no blur; browsers without `backdrop-filter` get the opaque tinted fill.
+
+**Contrast (measured, not asserted by a test).** Each surface was screenshotted twice, once normally and once with all text made transparent; the text colour is compared with the real backdrop pixels under each text line (2nd/98th percentile = worst case), at 1440 px and 390 px, day and dusk themes. Header nav links, worst case: day top 8.4:1, day over the garden 4.8:1, day over the dark band 8.3:1, dusk top 10.4:1, dusk over the garden 7.9:1, dusk over the band 9.0:1. Garden panel 7.7-11.3:1; invitation panel 5.3-5.5:1. Resting nav links are now `#36423c` (day) and `#ded9cc` (dusk); hover and current keep `--ink`. An earlier version of the measurement counted anti-aliased glyph edges as background and under-reported the header by about 2:1; it was replaced by the two-screenshot method above. The scripts are scratch and not in the repo.
+
+**Tests.** `tests/glass-v20.spec.mjs` (new, 30 cases across tokens, header fit at 12 widths in both languages, panels, reduced motion, phone menu, higher contrast, lite mode). Three older assertions that expected every header control to blur on its own were changed to the one-backdrop-per-surface rule (`glass.spec.mjs` x2, `glass2.spec.mjs` x1).
+
+**Size.** `site.min.css` +1.9 KB gzip (25.8 -> 27.8 KB), `motion.min.js` +0.35 KB gzip, `site.min.js` +0.02 KB. No new dependencies, no new image files.
+
+**Idle CPU** (same rig as the speed pass, 2 runs each, % of one core; previous HEAD vs V20): top of page 7.5 / 11.1 vs 7.0 / 6.6; scrollY 3000 0.1 / 0.1 vs 0.1 / 0.1; 9500 0.4 / 0.3 vs 0.2 / 0.1; 14815 0.1 / 0.1 vs 0.1 / 0.1. This is idle cost only; scrolling and paint cost on a real GPU was not measured.
+
+**Not verified.** Safari/WebKit and Firefox (only Chromium was run); real iPhone cost of the capsule, the garden panel and the invitation panel (backdrop blur is the expensive part there; the capsule is always on). Absolute CPU figures from the software-rendered headless browser overstate GPU cost.
+
 ## Measured sizes (esbuild, minified, gzip)
 
 gsap core 27.9 KB · gsap+ScrollTrigger 45.6 KB · lenis 5.7 KB · swup 7.5 KB · split-type 4.5 KB · lucide ×6 icons 1.9 KB · liquid-glass JS 1.2 KB + CSS 4.3 KB · existing: site.min.js 7.1 KB, motion.min.js 5.1 KB, site.min.css 24.1 KB.

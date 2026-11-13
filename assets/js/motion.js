@@ -446,6 +446,25 @@
     setTimeout(function () { dot.remove(); }, 750);
   }, { passive: true });
 
+  /* ───────── the closing invitation sits on a dusk photograph (decoration: lite and reduced-motion visits keep the plain dark band) ───────── */
+  // The dark glass panel in CSS (.visit__grid::before) needs something real behind it to show colour. The picture is lazy, decorative
+  // (aria-hidden, empty alt) and carries the same "concept render" label as every other render on the site.
+  (function () {
+    var band = document.querySelector('.visit');
+    if (!band || !band.querySelector('.visit__grid') || band.querySelector('.visit__bg')) return;
+    var me = document.querySelector('script[src*="motion"]');
+    if (!me || !me.src) return;
+    var dir = new URL('../img/', me.src).href, fa = (document.documentElement.lang || '').slice(0, 2) === 'fa';
+    var fig = document.createElement('figure');
+    fig.className = 'visit__bg'; fig.setAttribute('aria-hidden', 'true');
+    fig.innerHTML = '<picture><source type="image/avif" srcset="' + dir + 'tower-dusk-480.avif 480w, ' + dir + 'tower-dusk-700.avif 700w, ' + dir + 'tower-dusk-1024.avif 1024w" sizes="100vw">' +
+      '<img src="' + dir + 'tower-dusk-1024.webp" alt="" loading="lazy" decoding="async"></picture>' +
+      '<span class="kind" data-kind-label="render">' + (fa ? 'تصویرسازی مفهومی' : 'Concept render') + '</span>';
+    band.insertBefore(fig, band.firstChild);
+    var im = fig.querySelector('img'), shown = function () { im.classList.add('is-loaded'); };   // the site's lazy images start transparent until decoded
+    if (im.complete && im.naturalWidth) shown(); else { im.addEventListener('load', shown, { once: true }); im.addEventListener('error', shown, { once: true }); }
+  })();
+
   /* ───────── endless decoration only runs while it can be seen ───────── */
   // The motes, hero light drift, marquee, star twinkle, live pulses and the wordmark gleam loop forever. The browser keeps ticking them
   // (and repainting the ones CSS cannot hand to the compositor) even when they are far off screen, which held the main thread busy while

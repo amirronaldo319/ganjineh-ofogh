@@ -12,13 +12,18 @@ test.describe('material (desktop)', () => {
     await page.goto('index.html');
     await page.evaluate(() => scrollTo(0, 1500));
     await expect(page.locator('.header')).toHaveClass(/is-stuck/);
+    // V20: the controls inside the floating capsule share the capsule's one backdrop layer (a nested blur would sample
+    // only the capsule and cost a second GPU pass); the standalone back-to-top button still blurs the page itself
     for (const sel of ['.tools #theme-btn', '.tools #lang-btn', '.totop']) {
-      expect(await style(page, sel, 'backdropFilter'), `${sel} backdrop`).toMatch(/blur\(.*\) saturate\(1\.8\)/);
+      const own = sel === '.totop';
+      const bd = await style(page, sel, 'backdropFilter');
+      if (own) expect(bd, `${sel} backdrop`).toMatch(/blur\(.*\) saturate\(1\.8\)/); else expect(bd, `${sel} shares the capsule's backdrop`).toBe('none');
       expect(await style(page, sel, 'backgroundImage'), `${sel} sheen`).toContain('radial-gradient');
       expect(await style(page, sel, 'boxShadow'), `${sel} rim`).toContain('inset');
     }
-    expect(await style(page, '.header', 'backdropFilter')).toMatch(/blur\(20px\) saturate\(1\.8\)/);
-    expect(await style(page, '.header', 'boxShadow')).toContain('inset');
+    expect(await style(page, '.header__in', 'backdropFilter')).toMatch(/blur\(20px\) saturate\(1\.7\)/);
+    expect(await style(page, '.header__in', 'boxShadow')).toContain('inset');
+    expect(await style(page, '.header', 'backdropFilter'), 'the full-width bar is only the capsule footprint').toBe('none');
     expect(await style(page, '.kind', 'backdropFilter')).toMatch(/blur\(12px\) saturate\(1\.7\)/);
   });
 
@@ -141,7 +146,7 @@ test.describe('reduced motion keeps the material but not the extras', () => {
   test('glass stays, no lens filter, no pointer sheen script', async ({ page }) => {
     await cores(8)({ page });
     await page.goto('index.html');
-    expect(await style(page, '#theme-btn', 'backdropFilter')).toMatch(/blur\(14px\)/);
+    expect(await style(page, '.header__in', 'backdropFilter'), 'the capsule keeps its glass under reduced motion').toMatch(/blur\(20px\)/);
     expect(await page.locator('.totop').count(), 'the back-to-top button is part of the motion layer').toBe(0);
     expect(await page.evaluate(() => document.documentElement.classList.contains('lg-refract'))).toBe(false);
     expect(await page.locator('svg filter#of-lens').count()).toBe(0);

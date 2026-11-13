@@ -1780,3 +1780,147 @@ html.lenis, html.lenis body { height: auto; }
 @media screen and (prefers-reduced-motion: no-preference) and (min-aspect-ratio: 76/100) and ((prefers-reduced-transparency: reduce) or (prefers-contrast: more) or (forced-colors: active)) {
   html.js:not([data-lite]) .scene__text { background-color: #0f1a16; background-image: none; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; }
 }
+
+/* ═════ Liquid glass, V20: tokens, five variants, floating header, three signature surfaces ═════
+   One token layer drives every new surface (--g-* are set per variant, --glass-* are the shared values). Variants:
+   clear (small captions on pictures), pearl (the floating header), frost (text over a photograph), midnight (dense dark panels),
+   champagne (rare: the active-route pill and the booking button). One backdrop-filter per surface: nested controls inside the header
+   keep their rim and tint but drop their own blur, because a nested filter can only sample the bar behind it. */
+:root {
+  --glass-blur-sm: 12px; --glass-blur-md: 20px; --glass-blur-lg: 26px; --glass-sat: 1.7;
+  --glass-rim-light: rgba(255, 255, 255, .78); --glass-rim-dark: rgba(10, 22, 18, .2); --glass-highlight: rgba(255, 255, 255, .5);
+  --glass-shadow-soft: 0 10px 20px -14px rgba(10, 22, 18, .45);
+  --glass-shadow-floating: 0 22px 44px -24px rgba(10, 22, 18, .5), 0 2px 6px rgba(10, 22, 18, .1);
+  --glass-radius-control: 14px; --glass-radius-panel: 28px;
+  --glass-t-fast: .18s; --glass-t-normal: .35s;
+  --glass-text-primary: var(--ink); --glass-text-inverse: #f6f1e5;
+  --glass-clear-fill: rgba(14, 24, 20, .22);
+  --glass-pearl-fill: rgba(250, 247, 240, .56);
+  --glass-frost-fill: rgba(12, 20, 17, .46);
+  --glass-midnight-fill: rgba(9, 15, 13, .52);
+  --glass-champagne-fill: rgba(214, 186, 128, .4);
+  --glass-champagne-rim: rgba(168, 137, 92, .6);
+}
+:root[data-theme="dusk"] {
+  --glass-pearl-fill: rgba(22, 36, 30, .6); --glass-rim-light: rgba(255, 255, 255, .34); --glass-rim-dark: rgba(0, 0, 0, .45);
+  --glass-shadow-floating: 0 22px 44px -22px rgba(0, 0, 0, .7), 0 2px 6px rgba(0, 0, 0, .3);
+}
+html:not([data-theme="dusk"]) .header.is-dark { --glass-pearl-fill: rgba(15, 26, 22, .56); --glass-rim-light: rgba(255, 255, 255, .4); --glass-rim-dark: rgba(0, 0, 0, .4); }
+
+/* the recipe: variables in, surface out */
+.glass, .header__in, .bleed__in, .visit__grid::before, .menu nav {
+  --g-fill: var(--glass-pearl-fill); --g-blur: var(--glass-blur-md); --g-bright: 1.04; --g-radius: var(--glass-radius-control);
+  background-color: var(--g-fill); border-radius: var(--g-radius);
+}
+.glass--clear { --g-fill: var(--glass-clear-fill); --g-blur: var(--glass-blur-sm); --g-bright: .86; }
+.glass--pearl { --g-fill: var(--glass-pearl-fill); --g-blur: var(--glass-blur-md); --g-bright: 1.04; }
+.glass--frost { --g-fill: var(--glass-frost-fill); --g-blur: var(--glass-blur-lg); --g-bright: .92; --g-radius: var(--glass-radius-panel); }
+.glass--midnight { --g-fill: var(--glass-midnight-fill); --g-blur: var(--glass-blur-lg); --g-bright: .9; --g-radius: var(--glass-radius-panel); }
+.glass--champagne { --g-fill: var(--glass-champagne-fill); --g-blur: var(--glass-blur-sm); --g-bright: 1.05; }
+
+/* ── the floating header: an inset capsule; the full-width bar is only its footprint ── */
+.header { pointer-events: none; inset-block-start: env(safe-area-inset-top, 0px); padding-inline: max(clamp(10px, 2vw, 28px), env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px)); }
+.header.is-hidden { transform: translateY(-150%); }
+.header.is-stuck { background: none; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.header__in { pointer-events: auto; max-width: 1340px; padding-inline: clamp(16px, 2vw, 30px); height: calc(var(--header-h) - 12px); margin-inline: auto;
+  --g-fill: color-mix(in srgb, var(--bg) 90%, transparent); --g-radius: 999px;
+  border: 1px solid var(--line); box-shadow: var(--glass-shadow-floating); transition: background-color var(--glass-t-normal) var(--ease), box-shadow var(--glass-t-normal) var(--ease), border-color var(--glass-t-normal); }
+.header.is-stuck .header__in { --g-fill: color-mix(in srgb, var(--bg) 78%, transparent); }
+html:not([data-theme="dusk"]) .header.is-dark .header__in { --g-fill: color-mix(in srgb, #0f1a16 82%, transparent); }
+/* resting nav links: a notch darker (day) or lighter (dusk) than body text, so they keep 4.5:1 over whatever photograph passes beneath the capsule */
+html:not([data-theme="dusk"]) .header:not(.is-dark) .nav a:not(.cta):not(:hover):not([aria-current="true"]) { color: #36423c; }
+:root[data-theme="dusk"] .header .nav a:not(.cta):not(:hover):not([aria-current="true"]) { color: #ded9cc; }
+.brand__rule { margin-block-end: 5px; }
+/* the reading-progress hairline moves inside the capsule's lower edge */
+.progress { inset-block-end: 7px; inset-inline: max(calc(clamp(10px, 2vw, 28px) + 30px), calc((100% - 1340px) / 2 + 30px)); border-radius: 2px; }
+@media (max-width: 1199px) { .header__in { gap: .9rem; } .tool { width: 44px; height: 44px; } }
+@media (max-width: 380px) { .tool { width: 40px; height: 40px; } .header__in { gap: .5rem; padding-inline: 14px; } .tools { gap: .35rem; } }
+
+/* the active-route pill: one champagne glass shape glides to the hovered or current link (motion.js positions .nav__ind);
+   without the motion layer the current page link keeps its own static pill */
+.nav__ind { inset-block-end: auto; top: 50%; translate: 0 -50%; height: calc(100% + .5rem); box-sizing: content-box; padding-inline: .72rem; margin-left: -.72rem; border-radius: 999px; z-index: -1;
+  background: var(--glass-champagne-fill); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8), inset 0 0 0 1px var(--glass-champagne-rim); }
+.nav a:not(.cta) { isolation: isolate; }
+.nav:not(.has-ind) a[aria-current]:not(.cta)::before { content: ""; position: absolute; z-index: -1; inset-block: -.25rem; inset-inline: -.7rem; border-radius: 999px;
+  background: var(--glass-champagne-fill); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8), inset 0 0 0 1px var(--glass-champagne-rim); }
+.nav a[aria-current]:not(.cta)::after { transform: scaleX(0); }
+.nav a.cta { border-radius: 999px; padding: .55rem 1.2rem; border-color: var(--glass-champagne-rim); background-color: var(--glass-champagne-fill); color: var(--ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8), 0 8px 16px -12px rgba(122, 95, 56, .7); }
+.nav a.cta:hover { background-color: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+/* the picture labels: the helipad disclosure becomes smoked champagne glass; every label lets a little more of the picture through */
+.kind[data-kind-label="render-heli"] { background: rgba(96, 72, 40, .56); }
+
+/* the garden photograph: its caption sits on a frost panel instead of straight on the foliage */
+.bleed__in { --g-fill: var(--glass-frost-fill); --g-blur: var(--glass-blur-lg); --g-bright: .92; --g-radius: var(--glass-radius-panel);
+  padding: clamp(22px, 3.2vw, 44px); margin-block: clamp(18px, 4vw, 56px); max-width: 54ch; border: 1px solid rgba(255, 255, 255, .16); }
+.bleed .h2 { text-shadow: none; }
+
+/* the closing invitation: the whole row becomes one dense dark panel over a dusk photograph (the photograph is added by motion.js) */
+.visit__grid { position: relative; z-index: 1; padding-block: clamp(30px, 5vw, 72px); padding-inline: calc(var(--gutter) + clamp(14px, 3vw, 52px)); }
+.visit__grid::before { content: ""; position: absolute; z-index: -1; inset-block: 0; inset-inline: calc(var(--gutter) * .55);
+  --g-fill: var(--glass-midnight-fill); --g-blur: var(--glass-blur-lg); --g-bright: .9; --g-radius: 32px; border: 1px solid rgba(255, 255, 255, .14); }
+.visit__bg { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; margin: 0; }
+.visit__bg img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 62%; opacity: .72; }
+.visit__bg .kind { inset-block-end: 10px; inset-inline-start: auto; inset-inline-end: 12px; }
+@media (max-width: 880px) { .visit__grid::before { inset-inline: 8px; border-radius: 26px; } .visit__grid { padding-inline: calc(var(--gutter) + 6px); } }
+
+/* ── the phone menu: a glass panel on a light scrim; the page stays visible around it (no full-screen blur, no clip-path, which would hide the page from the glass) ── */
+.menu, [dir="rtl"] .menu, .menu.open, [dir="rtl"] .menu.open { clip-path: none; }
+.menu { background: transparent; overflow-y: auto; overscroll-behavior: contain; -webkit-backdrop-filter: none; backdrop-filter: none;
+  padding: calc(var(--header-h) + 2px) clamp(10px, 3vw, 24px) max(24px, env(safe-area-inset-bottom, 0px));
+  transition: background-color var(--glass-t-normal) var(--ease), visibility 0s .36s; }
+.menu.open { background: rgba(5, 9, 8, .46); transition: background-color var(--glass-t-normal) var(--ease), visibility 0s; }
+.menu nav { margin-block: 0 auto; padding: .15rem clamp(16px, 4.5vw, 30px); border: 1px solid rgba(255, 255, 255, .14);
+  --g-fill: rgba(9, 15, 13, .6); --g-blur: var(--glass-blur-lg); --g-bright: .92; --g-radius: 30px;
+  opacity: 0; transform: translateY(-10px) scale(.97); transform-origin: top; transition: opacity .26s var(--ease), transform .34s var(--ease); }
+.menu.open nav { opacity: 1; transform: none; transition-delay: .04s; }
+.menu nav a, html[lang="fa"] .menu nav a { font-size: clamp(1.3rem, 5vw, 1.9rem); padding-block: .46em; }
+.menu nav a:last-child { border-bottom: 0; }
+.menu .fine { margin-block-start: 1rem; align-self: start; padding: .42rem .95rem; border-radius: 999px; background: rgba(9, 15, 13, .66); color: rgba(237, 232, 220, .86); opacity: 0; transition: opacity .3s var(--ease) .12s; }
+.menu.open .fine { opacity: 1; }
+.menu__close { opacity: 0; transition: opacity .3s var(--ease); inset-inline-end: calc(max(clamp(10px, 2vw, 28px), env(safe-area-inset-left, 0px)) + clamp(16px, 2vw, 30px)); inset-block-start: calc((var(--header-h) - 44px) / 2); width: 44px; height: 44px; }
+.menu nav a small { color: #d6c18f; }
+.menu.open .menu__close { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .menu, .menu nav, .menu .fine, .menu__close { transition: none; } .menu nav { transform: none; } }
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass, .header__in, .bleed__in, .visit__grid::before, .menu nav {
+    background-image: linear-gradient(to bottom, rgba(255, 255, 255, .26), rgba(255, 255, 255, 0) 58%), radial-gradient(120% 160% at 50% -60%, var(--glass-highlight), transparent 62%);
+    -webkit-backdrop-filter: blur(var(--g-blur)) saturate(var(--glass-sat)) brightness(var(--g-bright)); backdrop-filter: blur(var(--g-blur)) saturate(var(--glass-sat)) brightness(var(--g-bright));
+    box-shadow: inset 0 1px 0 var(--glass-rim-light), inset 0 -1px 0 rgba(255, 255, 255, .1), inset 0 0 0 1px rgba(255, 255, 255, .12), 0 0 0 1px var(--glass-rim-dark), var(--glass-shadow-floating); }
+  .header__in { --g-fill: color-mix(in srgb, var(--bg) 66%, transparent); border-color: transparent; }
+  .header.is-stuck .header__in { --g-fill: color-mix(in srgb, var(--bg) 74%, transparent); }
+  /* dark capsules (dusk theme, or the day theme over a dark band) are denser and dimmer so light text keeps 4.5:1 over bright photographs */
+  :root[data-theme="dusk"] .header__in, html:not([data-theme="dusk"]) .header.is-dark .header__in { --g-bright: .78;
+    background-image: linear-gradient(to bottom, rgba(255, 255, 255, .12), rgba(255, 255, 255, 0) 58%), radial-gradient(120% 160% at 50% -60%, rgba(255, 255, 255, .14), transparent 62%); }
+  :root[data-theme="dusk"] .header__in { --g-fill: color-mix(in srgb, var(--bg) 84%, transparent); }
+  :root[data-theme="dusk"] .header.is-stuck .header__in { --g-fill: color-mix(in srgb, var(--bg) 90%, transparent); }
+  html:not([data-theme="dusk"]) .header.is-dark .header__in { --g-fill: color-mix(in srgb, #0f1a16 84%, transparent); }
+  .bleed__in, .visit__grid::before { background-image: linear-gradient(to bottom, rgba(255, 255, 255, .14), rgba(255, 255, 255, 0) 52%), radial-gradient(120% 120% at 50% -50%, rgba(255, 255, 255, .26), transparent 60%); }
+  .menu__close.tool { background-color: var(--glass-clear-fill); background-image: linear-gradient(160deg, rgba(255, 255, 255, .22), rgba(255, 255, 255, 0) 56%); border-color: transparent; color: var(--glass-text-inverse);
+    -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(1.7) brightness(.86); backdrop-filter: blur(var(--glass-blur-sm)) saturate(1.7) brightness(.86);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), inset 0 0 0 1px rgba(255, 255, 255, .16), var(--glass-shadow-soft); }
+  .header__in .tools .tool, .header__in .nav a.cta { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .nav a.cta { background-image: linear-gradient(to bottom, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0) 70%); }
+  .nav a.cta:hover { background-image: none; }
+  .kind { -webkit-backdrop-filter: blur(12px) saturate(1.7) brightness(.86); backdrop-filter: blur(12px) saturate(1.7) brightness(.86); }
+  html[data-lite] .bleed__in { -webkit-backdrop-filter: none; backdrop-filter: none; --g-fill: rgba(12, 20, 17, .78); }
+}
+
+/* fallbacks: reduced transparency, higher contrast and forced colors turn every V20 surface into a plain, readable panel */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
+  .glass, .header__in, .bleed__in, .visit__grid::before, .menu nav { background-image: none; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; }
+  .header__in { --g-fill: var(--bg); border: 1px solid var(--line-strong); }
+  html:not([data-theme="dusk"]) .header.is-dark .header__in { --g-fill: #0f1a16; }
+  .bleed__in { --g-fill: #0f1a16; border-color: rgba(255, 255, 255, .3); }
+  .menu nav { --g-fill: #0f1a16; border-color: rgba(255, 255, 255, .3); }
+  .menu.open { background: rgba(5, 9, 8, .8); }
+  .menu__close.tool { background-image: none; -webkit-backdrop-filter: none; backdrop-filter: none; background-color: #0f1a16; box-shadow: none; border-color: rgba(255, 255, 255, .5); }
+  .visit__grid::before { --g-fill: #0f1a16; border-color: rgba(255, 255, 255, .3); }
+  .visit__bg { display: none; }
+  .nav__ind, .nav:not(.has-ind) a[aria-current]:not(.cta)::before { background: transparent; box-shadow: inset 0 0 0 2px var(--ink); }
+  .nav a.cta { background-image: none; box-shadow: none; border-color: var(--ink); }
+  .kind[data-kind-label="render-heli"] { background: #5f4828; }
+  .kind { -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
