@@ -104,9 +104,9 @@ Branch `design/ganjineh-liquid-glass-v20`, local only: not committed, pushed or 
 
 ## Launch (2026-11-13)
 
-`robots.txt` now allows crawling and points at `https://ganjinehofogh.ir/sitemap.xml`. Canonical, `og:url` and sitemap URLs already used ganjinehofogh.ir. `data-mode="preview"` was left as is: nothing reads it, and the preview notices plus the disabled enquiry form stay until `/api/status` reports `acceptingEnquiries`. No `CNAME` yet: it must be added only after DNS points ganjinehofogh.ir at GitHub Pages.
+`robots.txt` now allows crawling and points at `https://ganjinehofogh.com/sitemap.xml`. Canonical, `og:url` and sitemap URLs already used ganjinehofogh.com. `data-mode="preview"` was left as is: nothing reads it, and the preview notices plus the disabled enquiry form stay until `/api/status` reports `acceptingEnquiries`. No `CNAME` yet: it must be added only after DNS points ganjinehofogh.com at GitHub Pages.
 
-Open before this is a complete launch: (1) DNS and HTTPS for ganjinehofogh.ir; (2) the site shows no phone, email or messenger contact, so until the enquiry backend exists visitors have no way to reach sales; (3) the floor count.
+Open before this is a complete launch: (1) DNS and HTTPS for ganjinehofogh.com; (2) the site shows no phone, email or messenger contact, so until the enquiry backend exists visitors have no way to reach sales; (3) the floor count.
 
 ## Measured sizes (esbuild, minified, gzip)
 
