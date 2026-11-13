@@ -31,6 +31,24 @@ Tests: `tests/live.spec.mjs` (12). Full suite: 52 passing. `site.css` / `site.mi
 
 Not done: auto day/dusk theme by time of day (the page already follows `prefers-color-scheme`), pointer spotlight on more cards (the apartment cards and the visit band already have one).
 
+## Liquid glass pass
+
+One shared material instead of a different blur on every control. It is plain CSS `backdrop-filter` (tint + blur + saturate + brightness) with a lit rim made of inset shadows, a soft sheen that follows the pointer, and an opaque fallback. The `@dpawlikowski/liquid-glass` package was **not** used: it duplicates the page behind each surface as a static layer and runs an always-animating turbulence filter, which is the wrong trade on a long scrolling page with photographs.
+
+| Where | What it looks like |
+|---|---|
+| Header buttons (theme, language, menu) | Round glass discs; hover lifts the glass instead of turning it solid; sheen follows the pointer (fine pointers only) |
+| Sticky header | Glass once the page has scrolled (`.is-stuck`), light and dark variants, dusk theme included |
+| Back-to-top, "Launch" dot | Round lenses. On Chromium with more than 4 cores they also **refract**: `backdrop-filter: url(#of-lens)` with an `feDisplacementMap` fed by a canvas-generated 96x96 map (data URI, no extra request). Checked with a striped backdrop: the stripes bend at the rim, so it is real refraction and not a blur with a highlight |
+| Photo captions (`.kind`, `.crown .frame .tag`), journey skip, `.scrub__live` chip, visit card, mobile sticky CTA | Same material, blur 12-22 px |
+| Tower viewer (`.iconbtn`, `.pill`, `.card`) | Same material, `@supports`-guarded |
+
+Rules kept: everything sits inside `@supports (backdrop-filter...)`. `prefers-reduced-transparency`, `prefers-contrast: more` and `forced-colors` restore opaque surfaces with no blur, no sheen and no lens. Reduced motion keeps the static glass but drops the lens filter and the pointer script (the back-to-top button is part of the motion layer, so it does not exist there). Lite devices (`data-lite`) are handled by the same early return.
+
+Known limits: the refraction needs Chromium, because `backdrop-filter: url()` is not implemented elsewhere; Safari and Firefox get the blur material without it, and those two were not tested here (no such browsers in this workspace). Nested backdrop filters inside the blurred header cannot sample page imagery, which is why the header buttons have no lens. On the mobile journey section the back-to-top disc can pass over the skip pill for a moment while scrolling; the glass makes that visible, it does not hide the pill.
+
+Tests: `tests/glass.spec.mjs` (10). Full suite: 62 passing. Lighthouse (mobile, local, two runs): accessibility 100, SEO 100, performance 74-83 against 75-82 before, CLS 0. Cost: about +1 KB gzip in `site.min.css` (25.1 KB) and +1 KB in `motion.min.js` (6.1 KB). Source for the CSS block is the "Liquid glass" section at the end of `site.css`; as before, the `.min` files were edited by hand.
+
 ## Measured sizes (esbuild, minified, gzip)
 
 gsap core 27.9 KB · gsap+ScrollTrigger 45.6 KB · lenis 5.7 KB · swup 7.5 KB · split-type 4.5 KB · lucide ×6 icons 1.9 KB · liquid-glass JS 1.2 KB + CSS 4.3 KB · existing: site.min.js 7.1 KB, motion.min.js 5.1 KB, site.min.css 24.1 KB.

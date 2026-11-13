@@ -1651,3 +1651,62 @@ html.lenis, html.lenis body { height: auto; }
 @media (prefers-reduced-motion: reduce) { .scrub__live i { animation: none; } }
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) { .scrub__live { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--night-2); } }
 @media print { .scrub__live { display: none; } }
+
+/* ═════ Liquid glass ═════
+   One material for every floating control: a clear, lightly tinted body that blurs and saturates what is behind it, a bright rim on the lit
+   edge, a soft contact shadow, and a sheen that follows the pointer (--gx / --gy, set by motion.js). Chromium also bends the picture at the
+   edge of the round controls that sit over crisp images (SVG displacement, html.lg-refract). All of it is inside @supports; the block after it
+   turns every surface back into a plain opaque panel for reduced transparency, higher contrast or forced colors. */
+:root { --lg-tint: rgba(255, 255, 255, .26); --lg-sheen: rgba(255, 255, 255, .55); --lg-rim: rgba(255, 255, 255, .78); --lg-rim-soft: rgba(255, 255, 255, .22); --lg-edge: rgba(15, 26, 22, .16); --lg-shade: rgba(10, 22, 18, .34); }
+:root[data-theme="dusk"], .header.is-dark { --lg-tint: rgba(255, 255, 255, .09); --lg-sheen: rgba(255, 255, 255, .28); --lg-rim: rgba(255, 255, 255, .42); --lg-rim-soft: rgba(255, 255, 255, .12); --lg-edge: rgba(0, 0, 0, .4); --lg-shade: rgba(0, 0, 0, .5); }
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  /* round controls: header buttons, back-to-top, the play button on the 3D launch card */
+  .tools .tool, .totop, .launch__dot {
+    background-color: var(--lg-tint);
+    background-image: radial-gradient(circle at var(--gx, 30%) var(--gy, 8%), var(--lg-sheen), transparent 62%), linear-gradient(155deg, rgba(255, 255, 255, .34), rgba(255, 255, 255, 0) 48%, rgba(255, 255, 255, .12));
+    -webkit-backdrop-filter: blur(14px) saturate(1.8) brightness(1.06); backdrop-filter: blur(14px) saturate(1.8) brightness(1.06);
+    box-shadow: inset 0 1px 0 var(--lg-rim), inset 0 -1px 1px var(--lg-rim-soft), inset 0 0 0 1px var(--lg-rim-soft), 0 0 0 1px var(--lg-edge), 0 12px 24px -14px var(--lg-shade), 0 1px 2px rgba(10, 22, 18, .14); }
+  .launch__dot { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8), inset 0 -1px 1px rgba(255, 255, 255, .25), inset 0 0 0 1px rgba(255, 255, 255, .3), 0 14px 30px -14px rgba(0, 0, 0, .6); }
+  .tools .tool { color: var(--ink); border-color: transparent; transition: background-color .3s, color .3s, box-shadow .35s var(--ease-out), translate .35s var(--ease-out); }
+  .tools .tool:hover { background-color: rgba(255, 255, 255, .44); color: var(--ink); border-color: transparent; translate: 0 -1px;
+    box-shadow: inset 0 1px 0 #fff, inset 0 -1px 1px var(--lg-rim-soft), inset 0 0 0 1px var(--lg-rim), 0 0 0 1px var(--lg-edge), 0 16px 28px -14px var(--lg-shade), 0 1px 2px rgba(10, 22, 18, .16); }
+  :root[data-theme="dusk"] .tools .tool:hover, .header.is-dark .tools .tool:hover { background-color: rgba(255, 255, 255, .2); }
+
+  /* captions and chips that sit on pictures */
+  .kind, .crown .frame .tag, html.js:not([data-lite]) .journey__skip, .scrub__live {
+    background-image: linear-gradient(160deg, rgba(255, 255, 255, .18), rgba(255, 255, 255, 0) 56%);
+    -webkit-backdrop-filter: blur(12px) saturate(1.7); backdrop-filter: blur(12px) saturate(1.7);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .36), inset 0 0 0 1px rgba(255, 255, 255, .14), 0 10px 20px -12px rgba(0, 0, 0, .5); }
+  .kind, .crown .frame .tag { border-radius: 10px; }
+  html.js:not([data-lite]) .journey__skip:hover { background-image: linear-gradient(160deg, rgba(255, 255, 255, .26), rgba(255, 255, 255, 0) 56%); }
+
+  /* the bar, the sales bar on phones, and the card on the dark visit band */
+  .header.is-stuck { background-color: color-mix(in srgb, var(--bg) 78%, transparent); background-image: linear-gradient(to bottom, rgba(255, 255, 255, .22), rgba(255, 255, 255, 0) 72%);
+    -webkit-backdrop-filter: blur(20px) saturate(1.8) brightness(1.04); backdrop-filter: blur(20px) saturate(1.8) brightness(1.04);
+    box-shadow: 0 1px 0 var(--line), inset 0 1px 0 var(--lg-rim), inset 0 -1px 0 var(--lg-rim-soft), 0 16px 32px -24px var(--lg-shade); }
+  html:not([data-theme="dusk"]) .header.is-dark.is-stuck { background-color: color-mix(in srgb, #0f1a16 72%, transparent); }
+  .visit__card { background-image: linear-gradient(160deg, rgba(255, 255, 255, .1), rgba(255, 255, 255, 0) 50%); -webkit-backdrop-filter: blur(18px) saturate(1.5); backdrop-filter: blur(18px) saturate(1.5);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .24), inset 0 0 0 1px rgba(255, 255, 255, .06), 0 28px 48px -30px rgba(0, 0, 0, .65); }
+  @media (max-width: 700px) {
+    .stickycta { background-color: color-mix(in srgb, var(--bg) 76%, transparent); background-image: linear-gradient(to bottom, rgba(255, 255, 255, .2), rgba(255, 255, 255, 0) 70%);
+      -webkit-backdrop-filter: blur(22px) saturate(1.8); backdrop-filter: blur(22px) saturate(1.8); box-shadow: 0 -1px 0 var(--line), inset 0 1px 0 var(--lg-rim); }
+  }
+
+  /* Chromium: the picture bends at the edge of a round lens (filter #of-lens is built by motion.js; the class is only added where it is safe) */
+  html.lg-refract .totop, html.lg-refract .launch__dot { -webkit-backdrop-filter: url(#of-lens) blur(1.5px) saturate(1.8) brightness(1.06); backdrop-filter: url(#of-lens) blur(1.5px) saturate(1.8) brightness(1.06); }
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
+  .tools .tool, .totop, .launch__dot, .kind, .crown .frame .tag, html.js:not([data-lite]) .journey__skip, .scrub__live, .visit__card, .header.is-stuck, .stickycta,
+  html.lg-refract .totop, html.lg-refract .launch__dot { background-image: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .tools .tool, .tools .tool:hover { box-shadow: none; translate: none; border-color: var(--line-strong); }
+  .tools .tool { background-color: transparent; }
+  .tools .tool:hover { background-color: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .totop { background-color: var(--bg); box-shadow: 0 0 0 1px var(--line-strong); }
+  .launch__dot { background-color: var(--night); box-shadow: none; }
+  .kind, html.js:not([data-lite]) .journey__skip, html.js:not([data-lite]) .journey__skip:hover { background-color: #0f1a16; box-shadow: none; }
+  .crown .frame .tag, .scrub__live { background-color: var(--night); box-shadow: none; }
+  .visit__card { background-color: var(--night-2); box-shadow: none; }
+  .header.is-stuck { background-color: var(--bg); box-shadow: 0 1px 0 var(--line); }
+  html:not([data-theme="dusk"]) .header.is-dark.is-stuck { background-color: #0f1a16; }
+  .stickycta { background-color: var(--bg); box-shadow: 0 -1px 0 var(--line); }
+}
