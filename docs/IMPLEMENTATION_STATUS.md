@@ -68,6 +68,16 @@ Known limits: the refraction needs Chromium, because `backdrop-filter: url()` is
 
 Tests: `tests/glass.spec.mjs` (10). Lighthouse (mobile, local, two runs): accessibility 100, SEO 100, performance 74-83 against 75-82 before, CLS 0. Cost: about +1 KB gzip in `site.min.css` (25.1 KB) and +1 KB in `motion.min.js` (6.1 KB). Source for the CSS block is the "Liquid glass" section at the end of `site.css`; as before, the `.min` files were edited by hand.
 
+## Speed pass: looping decoration pauses off screen
+
+Finding (headless Chrome, software rendering, idle page, 1440x900, 3 runs each): with nothing happening the page used 12-17% of one CPU core at every scroll position, almost none of it script. Switching off every CSS/Web Animation took that to about 3.6%, so the cost was the endless decoration itself: 16 motes, hero light drift, marquee, star twinkle, live pulses, the wordmark gleam. Chrome keeps ticking (and, for `box-shadow` and `background-position`, repainting) those loops even when the element is thousands of pixels off screen. No single loop dominated (the motes were the biggest, about 2-3 points).
+
+Fix: one block in `motion.js` ("endless decoration only runs while it can be seen"). Every animation on the page clock that loops forever is paused while its element is more than 200 px outside the viewport and resumed on return, with its phase kept. Scroll-driven animations (they use their own timeline) and one-shot entrances are never touched, and only animations paused by this block are resumed by it. Loops that start later are picked up when scrolling settles. Nothing here runs under reduced motion or `data-lite`, which return before it.
+
+Result (same rig, before -> after, idle CPU of one core): scrollY 3000: 13.0-13.9% -> 0.1%; 9500: 15.4-17.3% -> 0.1-0.3%; 14815: 11.9-13.0% -> 0.1-0.4%; top of page: 11.2-14.9% -> 7.4-11.3% (the hero's own loops are on screen there and still run). Tests: `tests/offscreen-motion.spec.mjs` (4). Full suite: 76 passing.
+
+What this does not fix: the first-load path was already light (about 790 KB, no third-party requests); what a visitor in Iran feels from GitHub Pages' US hosting, and how iPhone Safari handles the blur layers, cannot be measured from this workspace.
+
 ## Measured sizes (esbuild, minified, gzip)
 
 gsap core 27.9 KB · gsap+ScrollTrigger 45.6 KB · lenis 5.7 KB · swup 7.5 KB · split-type 4.5 KB · lucide ×6 icons 1.9 KB · liquid-glass JS 1.2 KB + CSS 4.3 KB · existing: site.min.js 7.1 KB, motion.min.js 5.1 KB, site.min.css 24.1 KB.

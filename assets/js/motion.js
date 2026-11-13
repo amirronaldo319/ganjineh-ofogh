@@ -446,6 +446,45 @@
     setTimeout(function () { dot.remove(); }, 750);
   }, { passive: true });
 
+  /* ───────── endless decoration only runs while it can be seen ───────── */
+  // The motes, hero light drift, marquee, star twinkle, live pulses and the wordmark gleam loop forever. The browser keeps ticking them
+  // (and repainting the ones CSS cannot hand to the compositor) even when they are far off screen, which held the main thread busy while
+  // the page sat idle. Here every looping animation on the page clock is paused while its element is more than 200px outside the viewport
+  // and resumed as it comes back; the phase is kept, so nothing visibly restarts. Scroll-driven animations (their own timeline) and
+  // one-shot entrances are never touched. Only animations paused here are resumed here.
+  (function () {
+    if (!('IntersectionObserver' in window) || !document.getAnimations) return;
+    var state = new WeakMap(), mine = new WeakSet();
+    var set = function (a, visible) {
+      try {
+        if (!visible && a.playState === 'running') { a.pause(); mine.add(a); }
+        else if (visible && mine.has(a)) { mine.delete(a); a.play(); }
+      } catch (_) { /* an animation that was cancelled meanwhile */ }
+    };
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        var s = state.get(e.target);
+        if (!s) return;
+        s.visible = e.isIntersecting;
+        s.list.forEach(function (a) { set(a, s.visible); });
+      });
+    }, { rootMargin: '200px 0px' });
+    var scan = function () {
+      document.getAnimations().forEach(function (a) {
+        var fx = a.effect, el = fx && fx.target;
+        if (!el || a.timeline !== document.timeline || fx.getComputedTiming().iterations !== Infinity) return;
+        var s = state.get(el);
+        if (!s) { s = { visible: true, list: [] }; state.set(el, s); io.observe(el); }
+        if (s.list.indexOf(a) < 0) { s.list.push(a); if (!s.visible) set(a, false); }
+      });
+    };
+    var timer = 0;
+    var later = function () { clearTimeout(timer); timer = setTimeout(scan, 250); };
+    scan(); setTimeout(scan, 1500);
+    // loops that start later (the gleam, specks added by another layer) are picked up when scrolling settles
+    window.addEventListener('scroll', later, { passive: true });
+  })();
+
   /* ───────── liquid glass: the sheen on a glass control follows the pointer; Chromium also bends the picture at a round lens's edge ───────── */
   // CSS does the material (see "Liquid glass" in site.css). Here: (1) --gx/--gy so the highlight sits under the pointer, and (2) one SVG
   // displacement filter, #of-lens, used by the back-to-top and play buttons through backdrop-filter. Only Chromium draws url() filters in
