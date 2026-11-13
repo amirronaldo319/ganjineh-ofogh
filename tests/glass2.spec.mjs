@@ -11,8 +11,11 @@ test.describe('material (desktop)', () => {
 
   test('buttons: outline variants are glass, every variant has the lit rim and a sheen', async ({ page }) => {
     await page.goto('index.html');
+    expect(blurs(await style(page, '.hero .btn--ghost', 'backdropFilter')), 'ghost button blur').toBe(true);
+    // V20: the header CTA is a champagne capsule inside the header's glass, so it carries a tint and a rim but no second blur layer
+    expect(blurs(await style(page, '.nav a.cta', 'backdropFilter')), 'header CTA shares the capsule backdrop').toBe(false);
+    await expect.poll(() => style(page, '.nav a.cta', 'backgroundColor'), { message: 'header CTA champagne fill (it eases in at load)' }).not.toBe('rgba(0, 0, 0, 0)');
     for (const sel of ['.hero .btn--ghost', '.nav a.cta']) {
-      expect(blurs(await style(page, sel, 'backdropFilter')), `${sel} blur`).toBe(true);
       expect(await style(page, sel, 'boxShadow'), `${sel} rim`).toContain('inset');
     }
     const primary = '.hero .btn:not(.btn--ghost)';
@@ -60,7 +63,8 @@ test.describe('material (desktop)', () => {
 
   test('menu and toast are glass', async ({ page }) => {
     await page.goto('index.html');
-    expect(await style(page, '.menu', 'backdropFilter')).toMatch(/blur\(36px\)/);
+    expect(blurs(await style(page, '.menu nav', 'backdropFilter')), 'the menu panel is the glass').toBe(true);
+    expect(await style(page, '.menu', 'backdropFilter'), 'the scrim around it is not blurred').toBe('none');
     expect(blurs(await style(page, '.toast', 'backdropFilter'))).toBe(true);
   });
 
@@ -92,12 +96,12 @@ test.describe('higher contrast turns the new surfaces opaque', () => {
   test('site', async ({ page }) => {
     await cores(8)({ page });
     await page.goto('index.html');
-    for (const sel of ['.hero .btn--ghost', '.hero .btn:not(.btn--ghost)', '.nav a.cta', '.scene__text', '.journey__bar', '.menu', '.toast']) {
+    for (const sel of ['.hero .btn--ghost', '.hero .btn:not(.btn--ghost)', '.nav a.cta', '.scene__text', '.journey__bar', '.menu nav', '.toast']) {
       expect(await style(page, sel, 'backdropFilter'), `${sel} blur`).toBe('none');
       expect(await style(page, sel, 'backgroundImage'), `${sel} sheen`).toBe('none');
     }
     expect(await style(page, '.scene__text', 'backgroundColor'), 'caption card is a solid dark panel').toBe('rgb(15, 26, 22)');
-    expect(await style(page, '.menu', 'backgroundColor')).not.toMatch(/rgba\(.*, 0\.\d+\)$/);
+    expect(await style(page, '.menu nav', 'backgroundColor'), 'menu panel is solid').toBe('rgb(15, 26, 22)');
     expect(await style(page, '.hero .btn--ghost', 'boxShadow')).toBe('none');
   });
   test('pills and lightbox', async ({ page }) => {

@@ -134,6 +134,7 @@
     menuBtn.addEventListener('click', function () { setMenu(true); });
     var mc = $('#menu-close'); if (mc) mc.addEventListener('click', function () { setMenu(false); });
     $$('#menu a').forEach(function (a) { a.addEventListener('click', function () { setMenu(false); }); });
+    menu.addEventListener('click', function (e) { if (e.target === menu) setMenu(false); });   // a tap on the scrim around the panel closes it
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && menuOpen) setMenu(false); });
     window.addEventListener('resize', function () { if (menuOpen && window.innerWidth >= 1200) setMenu(false); });
   }
