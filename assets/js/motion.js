@@ -445,4 +445,52 @@
     btn.appendChild(dot);
     setTimeout(function () { dot.remove(); }, 750);
   }, { passive: true });
+
+  /* ───────── liquid glass: the sheen on a glass control follows the pointer; Chromium also bends the picture at a round lens's edge ───────── */
+  // CSS does the material (see "Liquid glass" in site.css). Here: (1) --gx/--gy so the highlight sits under the pointer, and (2) one SVG
+  // displacement filter, #of-lens, used by the back-to-top and play buttons through backdrop-filter. Only Chromium draws url() filters in
+  // backdrop-filter, and only where it is cheap and welcome (not low-power, reduced transparency, higher contrast or forced colors).
+  (function () {
+    var fine = !!(window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches);
+    var GLASS = '.tools .tool, .totop, .launch__dot, .journey__skip, .lb__btn, .nav a.cta, .btn, .filter, .aptbtn';
+    if (fine) {
+      var on = null, gx = 0, gy = 0, gr = 0;
+      var paint = function () { gr = 0; if (on) { on.style.setProperty('--gx', gx + 'px'); on.style.setProperty('--gy', gy + 'px'); } };
+      document.addEventListener('pointermove', function (e) {
+        var t = e.target && e.target.closest ? e.target.closest(GLASS) : null;
+        if (on && on !== t) { on.style.removeProperty('--gx'); on.style.removeProperty('--gy'); on = null; }
+        if (!t) return;
+        var r = t.getBoundingClientRect(); on = t; gx = Math.round(e.clientX - r.left); gy = Math.round(e.clientY - r.top);
+        if (!gr) gr = requestAnimationFrame(paint);
+      }, { passive: true });
+    }
+    var brands = navigator.userAgentData && navigator.userAgentData.brands;
+    var chromium = !!(brands && brands.some(function (b) { return /Chromium/i.test(b.brand); }));
+    var calm = ['(prefers-reduced-transparency: reduce)', '(prefers-contrast: more)', '(forced-colors: active)'].some(function (q) { return matchMedia(q).matches; });
+    if (!chromium || calm || (navigator.hardwareConcurrency || 8) <= 4 || !(window.CSS && CSS.supports && CSS.supports('backdrop-filter', 'blur(1px)'))) return;
+    // displacement map: at the rim every pixel is pulled toward the centre (red = x, green = y, 128 = no shift); the middle is untouched
+    var n = 96, h = n / 2, c = document.createElement('canvas'), g = c.getContext && c.getContext('2d');
+    if (!g) return;
+    c.width = c.height = n;
+    var img = g.createImageData(n, n), d = img.data;
+    for (var y = 0; y < n; y++) {
+      for (var x = 0; x < n; x++) {
+        var px = (x + 0.5 - h) / h, py = (y + 0.5 - h) / h, dist = Math.sqrt(px * px + py * py), i = (y * n + x) * 4, vx = 0, vy = 0;
+        if (dist > 0 && dist < 1) {
+          var k = Math.min(1, (1 - dist) / 0.34); k = 1 - k * k * (3 - 2 * k); k *= k;
+          vx = -px / dist * k; vy = -py / dist * k;
+        }
+        d[i] = 128 + vx * 127; d[i + 1] = 128 + vy * 127; d[i + 2] = 128; d[i + 3] = 255;
+      }
+    }
+    g.putImageData(img, 0, 0);
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '0'); svg.setAttribute('height', '0'); svg.setAttribute('aria-hidden', 'true'); svg.setAttribute('focusable', 'false');
+    svg.style.cssText = 'position:absolute;pointer-events:none';
+    svg.innerHTML = '<filter id="of-lens" x="0" y="0" width="1" height="1" primitiveUnits="objectBoundingBox" color-interpolation-filters="sRGB">' +
+      '<feImage href="' + c.toDataURL('image/png') + '" x="0" y="0" width="1" height="1" preserveAspectRatio="none" result="m"/>' +
+      '<feDisplacementMap in="SourceGraphic" in2="m" scale="0.4" xChannelSelector="R" yChannelSelector="G"/></filter>';
+    document.body.appendChild(svg);
+    document.documentElement.classList.add('lg-refract');
+  })();
 })();
