@@ -17,6 +17,20 @@ Branch: `feat/ganjineh-v30-cinematic-redesign`. Nothing is pushed to production.
 
 Dev-only additions: `esbuild` (bundling `tools/src/*`), `@playwright/test` (tests). None of them is referenced by any published page; the site still needs no build step.
 
+## "More alive, more Apple-like" pass
+
+The site already had the cinematic layer (scroll-exit hero, count-ups, tilt, cursor ring, journey and day-to-dusk scrubbers), so this pass added only what was missing and fixed one defect. No new library; everything runs on the existing `motion.js` rAF loop and `site.js`.
+
+| Change | Where | Notes |
+|---|---|---|
+| Statement reveal | `motion.js` (`lit` + `frame()`), `.quote.is-lit .sw > i` in `site.css` | The home page's key sentence lights up word by word, in reading order, as it crosses the screen (Persian split by word only). `--qp` / `--qn` drive it. Floor opacity .3, fully lit once the line is above the middle. Not applied with reduced motion, lite mode or no JS. |
+| Live Tehran light | `data-live-light` chip in the day-to-dusk heading (both home pages), IIFE in `site.js` | Shows Tehran time and the next sunrise or sunset, from the standard low-precision solar series for 35.6944 N, 51.4215 E at a fixed UTC+03:30. Astronomy only; says nothing about the building. Matches published Tehran tables to within 2 minutes (tested). Persian digits on the Persian page, Latin on `/en/`. Updates every 15 s while the tab is visible. |
+| Side-dots clearance | `@media (min-width:1180px) and (max-width:1719px)` rule in `site.css` | Below 1720 px the active section label overlapped the page content (measured: label reached x = 114 px, content starts at 48-60 px). It now shows on hover or focus there and stays visible beside the dot on wider screens. |
+
+Tests: `tests/live.spec.mjs` (12). Full suite: 52 passing. `site.css` / `site.min.css`, `site.js` / `site.min.js` and `motion.js` / `motion.min.js` were edited in pairs; the minified JS was spliced by hand (no minifier step in this repo), so regenerate both from the source when `build_site.py` is recovered.
+
+Not done: auto day/dusk theme by time of day (the page already follows `prefers-color-scheme`), pointer spotlight on more cards (the apartment cards and the visit band already have one).
+
 ## Measured sizes (esbuild, minified, gzip)
 
 gsap core 27.9 KB · gsap+ScrollTrigger 45.6 KB · lenis 5.7 KB · swup 7.5 KB · split-type 4.5 KB · lucide ×6 icons 1.9 KB · liquid-glass JS 1.2 KB + CSS 4.3 KB · existing: site.min.js 7.1 KB, motion.min.js 5.1 KB, site.min.css 24.1 KB.

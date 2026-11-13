@@ -429,6 +429,60 @@
   }
   window.ofogh = { lang: function () { return state.lang; }, onLang: function (fn) { AFTER_LANG.push(fn); }, toFa: toFa, api: api, mailFallback: mailFallback };
 
+  /* ───────── live light: the sun over Tehran right now (astronomy only; it says nothing about the building) ───────── */
+  // Sunrise and sunset come from the standard low-precision solar series (NOAA / Meeus), good to about a minute at this latitude.
+  // Iran has stayed on UTC+03:30 all year since 2022, so the offset is fixed instead of trusting the device's time-zone data.
+  (function () {
+    var live = document.querySelector('[data-live-light]');
+    if (!live) return;
+    var lbl = live.querySelector('.lbl');
+    var LAT = 35.6944, LON = 51.4215, OFFSET = 3.5 * 36e5, DAY = 864e5, rad = Math.PI / 180;
+    function sunEvents(t) {
+      var J1970 = 2440588, J2000 = 2451545, J0 = 0.0009, E = rad * 23.4397, lw = rad * -LON, phi = rad * LAT;
+      var n = Math.round(t / DAY - 0.5 + J1970 - J2000 - J0 - lw / (2 * Math.PI));
+      var ds = J0 + lw / (2 * Math.PI) + n;
+      var M = rad * (357.5291 + 0.98560028 * ds);
+      var L = M + rad * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M)) + rad * 102.9372 + Math.PI;
+      var dec = Math.asin(Math.sin(E) * Math.sin(L));
+      var transit = function (a) { return J2000 + a + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L); };
+      var w = Math.acos((Math.sin(rad * -0.833) - Math.sin(phi) * Math.sin(dec)) / (Math.cos(phi) * Math.cos(dec)));
+      var noon = transit(ds), set = transit(J0 + (w + lw) / (2 * Math.PI) + n);
+      var ms = function (j) { return (j + 0.5 - J1970) * DAY; };
+      return { rise: ms(noon - (set - noon)), set: ms(set) };
+    }
+    var T = {
+      fa: { now: 'اکنون در تهران', riseToday: 'طلوع امروز', setToday: 'غروب امروز', riseTomorrow: 'طلوع فردا' },
+      en: { now: 'Tehran now', riseToday: 'sunrise today', setToday: 'sunset today', riseTomorrow: 'sunrise tomorrow' }
+    };
+    var isFa = function () { return document.documentElement.lang !== 'en'; };
+    var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+    var hhmm = function (ms) {
+      var d = new Date(ms + OFFSET), s = pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes());
+      return isFa() ? s.replace(/\d/g, function (c) { return '۰۱۲۳۴۵۶۷۸۹'[c]; }) : s;
+    };
+    var last = '';
+    function paint() {
+      var now = Date.now(), ev = sunEvents(now), key, at;
+      if (now < ev.rise) { key = 'riseToday'; at = ev.rise; }
+      else if (now < ev.set) { key = 'setToday'; at = ev.set; }
+      else { key = 'riseTomorrow'; at = sunEvents(now + DAY).rise; }
+      var tx = T[isFa() ? 'fa' : 'en'], clock = hhmm(now), next = hhmm(at), sig = (isFa() ? 'f' : 'e') + clock + key + next;
+      if (sig === last) return;
+      last = sig;
+      lbl.textContent = '';
+      [[tx.now + ' ', clock], [' · ' + tx[key] + ' ', next]].forEach(function (p) {
+        lbl.appendChild(document.createTextNode(p[0]));
+        var t = document.createElement('span'); t.className = 't'; t.dir = 'ltr'; t.textContent = p[1]; lbl.appendChild(t);
+      });
+      live.hidden = false;
+    }
+    paint();
+    setInterval(function () { if (!document.hidden) paint(); }, 15000);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) paint(); });
+    if (window.ofogh) { if (window.ofogh.onLang) window.ofogh.onLang(paint); window.ofogh.sunEvents = sunEvents; }
+  })();
+
+
   /* ───────── go ───────── */
   setLang(state.lang, { persist: false, fromChild: true });
   /* ───────── print this apartment ───────── */
