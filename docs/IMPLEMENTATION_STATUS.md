@@ -102,6 +102,12 @@ Branch `design/ganjineh-liquid-glass-v20`, local only: not committed, pushed or 
 
 **Not verified.** Safari/WebKit and Firefox (only Chromium was run); real iPhone cost of the capsule, the garden panel and the invitation panel (backdrop blur is the expensive part there; the capsule is always on). Absolute CPU figures from the software-rendered headless browser overstate GPU cost.
 
+## Launch (2026-11-13)
+
+`robots.txt` now allows crawling and points at `https://ganjinehofogh.ir/sitemap.xml`. Canonical, `og:url` and sitemap URLs already used ganjinehofogh.ir. `data-mode="preview"` was left as is: nothing reads it, and the preview notices plus the disabled enquiry form stay until `/api/status` reports `acceptingEnquiries`. No `CNAME` yet: it must be added only after DNS points ganjinehofogh.ir at GitHub Pages.
+
+Open before this is a complete launch: (1) DNS and HTTPS for ganjinehofogh.ir; (2) the site shows no phone, email or messenger contact, so until the enquiry backend exists visitors have no way to reach sales; (3) the floor count.
+
 ## Measured sizes (esbuild, minified, gzip)
 
 gsap core 27.9 KB · gsap+ScrollTrigger 45.6 KB · lenis 5.7 KB · swup 7.5 KB · split-type 4.5 KB · lucide ×6 icons 1.9 KB · liquid-glass JS 1.2 KB + CSS 4.3 KB · existing: site.min.js 7.1 KB, motion.min.js 5.1 KB, site.min.css 24.1 KB.
