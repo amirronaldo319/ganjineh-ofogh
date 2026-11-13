@@ -204,6 +204,15 @@ html[lang="fa"] .tour-title { font-family: var(--font-fa); font-weight: 700; fon
 @media (prefers-reduced-motion: reduce) { .iconbtn:active, .tbtn:active { transform: none; } }
 .touring .opts { display: none !important; }
 .touring .sidebtns #reset-btn { opacity: .9; }
+/* glass fallbacks: blur is decoration; opaque panels when transparency is reduced, contrast is raised, or blur is unsupported */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
+  .iconbtn, .pill, .card, .skip { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--panel-solid); }
+  .iconbtn[aria-expanded="true"], .iconbtn[aria-pressed="true"] { background: var(--accent); }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .iconbtn, .pill, .card, .skip { background: var(--panel-solid); }
+  .iconbtn[aria-expanded="true"], .iconbtn[aria-pressed="true"] { background: var(--accent); }
+}
 </style>
 <div role="main" style="display:contents"><div id="stage" role="img" data-i18n-aria="stageLabel" aria-label="Interactive 3D model of the Ganjineh Ofogh tower" aria-describedby="alt"></div>
 <p id="alt" class="sr-only"></p></div>
@@ -339,6 +348,7 @@ html[lang="fa"] .tour-title { font-family: var(--font-fa); font-weight: 700; fon
     if (text) $('status-msg').textContent = text;
   }
   function fail(msg) {
+    try { $('alt').textContent = t('alt'); } catch (e) { /* t() not ready yet */ }   // keep the text description for screen readers
     var m = $('status-msg'); m.textContent = msg; m.style.textTransform = 'none';
     statusEl.classList.remove('gone'); statusEl.classList.add('failed');
     statusEl.querySelector('.bar').style.display = 'none';
